@@ -149,7 +149,14 @@
         <a class="boton boton--oscuro" data-mapa data-si="mapa" href="#" target="_blank" rel="noopener">Abrir en Google Maps <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
       <figure class="mapa">
-        <iframe data-mapa-embed title="Mapa del local" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="mapa-marco">
+          <a class="mapa-enlace" data-mapa href="#" target="_blank" rel="noopener">
+            <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+            <b>Ver en Google Maps</b>
+            <span data-dato="direccion-ciudad"></span>
+          </a>
+          <iframe data-mapa-embed title="Mapa del local" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
         <figcaption>
           <svg class="icono icono--acento" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
           <span><b data-dato="nombre">Sushi</b><small data-dato="direccion-ciudad"></small></span>

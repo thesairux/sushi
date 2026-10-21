@@ -19,8 +19,8 @@
     Si cada opción tiene otro precio, ponlo en "preciosOpciones".
   - "rolls": cuántos rolls arma el cliente en ese producto (20 cortes = 2 rolls de 10).
   - "personalizar": qué elige el cliente en cada roll (los grupos están en "personalizacion").
-  - En "personalizacion", "gratis": 1 significa que la primera opción con precio de ese grupo
-    no se cobra (ej: la primera envoltura en queso o palta).
+  - En una opción de "personalizacion", "gratis": 1 significa que la primera de esa opción no se cobra
+    y desde la segunda se cobra su precio (ej: la primera envoltura en palta y la primera en queso).
   Cuidado con las comas: cada elemento de una lista va separado por una coma.
 */
 window.CARTA = {
@@ -35,7 +35,8 @@ window.CARTA = {
     "sector": "Peñuelas",
     "ciudad": "Coquimbo",
     "region": "",
-    "mapa": "https://www.google.com/maps/search/?api=1&query=R%C3%ADo+Hurtado+861%2C+Pe%C3%B1uelas%2C+Coquimbo%2C+Chile",
+    "mapa": "https://www.google.com/maps/place/PROMO+SUSHI+BURGUER+AND+CHICKEN/data=!4m2!3m1!1s0x0:0xaa804bdec96c8585",
+    "mapaBusqueda": "PROMO SUSHI BURGUER AND CHICKEN, Río Hurtado 861, Coquimbo, Chile",
     "cartaReferencial": true,
     "valorDelivery": null,
     "notaDelivery": "Según el sector",
@@ -157,8 +158,7 @@ window.CARTA = {
       "porRoll": true,
       "min": 1,
       "max": 1,
-      "gratis": 1,
-      "ayuda": "Envoltura en queso o palta: la primera es gratis; desde la segunda, $1.000 cada una.",
+      "ayuda": "Envoltura en queso o en palta: la primera de cada una va gratis; desde la segunda, $1.000 cada una.",
       "opciones": [
         { "id": "panko", "nombre": "Panko", "precio": 0 },
         { "id": "sesamo", "nombre": "Sésamo", "precio": 0 },
@@ -172,8 +172,8 @@ window.CARTA = {
         { "id": "tempura", "nombre": "Tempura", "precio": 0 },
         { "id": "panko-coco", "nombre": "Panko-coco", "precio": 0 },
         { "id": "panko-crispy", "nombre": "Panko-crispy", "precio": 0 },
-        { "id": "queso", "nombre": "Queso", "precio": 1000 },
-        { "id": "palta", "nombre": "Palta", "precio": 1000 }
+        { "id": "queso", "nombre": "Queso", "precio": 1000, "gratis": 1 },
+        { "id": "palta", "nombre": "Palta", "precio": 1000, "gratis": 1 }
       ]
     }
   ],

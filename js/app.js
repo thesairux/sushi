@@ -88,18 +88,22 @@
     var varia = lista.some(function (v) { return v !== min; });
     return { valor: min, desde: varia };
   }
-  /* Lo elegido en cada roll con lo que se cobra. Con "gratis" en el grupo, las primeras opciones con precio no se cobran. */
+  /* Lo elegido en cada roll con lo que se cobra. Con "gratis" en una opción, las primeras de esa opción no se cobran;
+     con "gratis" en el grupo, las primeras opciones con precio del grupo. */
   function detalleArmado(id, conf) {
     var armado = conf.armado || [];
     var filas = armado.map(function () { return {}; });
     gruposArmado(id).forEach(function (g) {
       var gratis = g.gratis || 0;
+      var usadas = {};
       armado.forEach(function (r, i) {
         var o = r && opcionDe(g.id, r[g.id]);
         if (!o) return;
         var cobro = o.precio || 0;
         var libre = false;
-        if (cobro > 0 && gratis > 0) { gratis--; cobro = 0; libre = true; }
+        usadas[o.id] = (usadas[o.id] || 0) + 1;
+        if (cobro > 0 && o.gratis && usadas[o.id] <= o.gratis) { cobro = 0; libre = true; }
+        else if (cobro > 0 && gratis > 0) { gratis--; cobro = 0; libre = true; }
         filas[i][g.id] = { o: o, cobro: cobro, gratis: libre };
       });
     });
@@ -283,7 +287,8 @@
     if (N.mapa) $$("[data-mapa]").forEach(function (a) { a.href = N.mapa; });
     var mapa = $("[data-mapa-embed]");
     if (mapa && N.direccion && !$("#ubicacion").hidden) {
-      mapa.src = "https://www.google.com/maps?q=" + encodeURIComponent([N.direccion, N.sector, N.ciudad, "Chile"].filter(Boolean).join(", ")) + "&output=embed";
+      var busqueda = N.mapaBusqueda || [N.direccion, N.sector, N.ciudad, "Chile"].filter(Boolean).join(", ");
+      mapa.src = "https://www.google.com/maps?q=" + encodeURIComponent(busqueda) + "&output=embed";
     }
     var largo = $("[data-horario-largo]");
     if (largo) largo.innerHTML = horarioLargo();
@@ -1206,7 +1211,7 @@
     caja.innerHTML = encontrado.ga.map(function (g) {
       return '<div class="arma-grupo"><h3>' + esc(g.nombre + (/[aeiouáéíóú]$/i.test(g.nombre) ? "s" : "es")) + "</h3>" +
         "<ul>" + (g.opciones || []).filter(function (o) { return o.disponible !== false; }).map(function (o) {
-          return "<li>" + esc(o.nombre) + (o.precio ? " <small>+" + plata(o.precio) + "</small>" : "") + "</li>";
+          return "<li>" + esc(o.nombre) + (o.precio ? " <small>" + (o.gratis ? "1ª gratis, luego +" : "+") + plata(o.precio) + "</small>" : "") + "</li>";
         }).join("") + "</ul>" + (g.ayuda ? '<p class="arma-promo">' + esc(g.ayuda) + "</p>" : "") + "</div>";
     }).join("");
   }

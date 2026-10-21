@@ -26,8 +26,10 @@ y guarda con **Commit changes**. Si la página está en Vercel, se actualiza sol
 - **Nombre, WhatsApp, dirección, Facebook, Instagram**: en `"negocio"`, al principio del archivo. Lo que quede
   vacío no se muestra: sin `"direccion"` no aparece la sección de ubicación; sin `"instagram"`, no hay enlace.
 - **Armar rolls**: las opciones de proteína, relleno y envoltura están en `"personalizacion"`. En cada producto
-  de *Ármalos a tu pinta*, `"rolls"` dice cuántos rolls arma el cliente. La envoltura usa `"gratis": 1`: la
-  primera en queso o palta no se cobra y desde la segunda se cobra su precio ($1.000).
+  de *Ármalos a tu pinta*, `"rolls"` dice cuántos rolls arma el cliente. Las envolturas de queso y de palta
+  tienen `"gratis": 1`: la primera de cada una no se cobra y cada repetida cuesta $1.000
+  (palta + queso = gratis; palta + palta = $1.000; palta + palta + queso = $1.000).
+- **Mapa**: `"mapa"` es el enlace del local en Google Maps y `"mapaBusqueda"` lo que se busca para mostrar el mapa.
 - **Valor del delivery**: hoy es `null` con `"notaDelivery": "Según el sector"`, así que el pedido dice que el
   despacho depende del sector y se confirma por WhatsApp. Con un valor fijo (`"valorDelivery": 2000`) se suma al total.
 - **Datos de transferencia**: `"datosTransferencia": "Banco …\nCuenta …\nRUT …"` se muestran cuando el
