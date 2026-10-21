@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
-<title>Sushi a tu pinta | Promos y pedidos por WhatsApp</title>
-<meta name="description" content="Promos de sushi, handrolls y rolls armados a tu pinta. Arma tu pedido y envíalo por WhatsApp.">
+<title>Promo Sushi | Sushi en Peñuelas, Coquimbo</title>
+<meta name="description" content="Promo Sushi en Peñuelas, Coquimbo: promos de sushi, handrolls y rolls armados a tu pinta. Arma tu pedido y envíalo por WhatsApp.">
 <meta name="theme-color" content="#121014">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Sushi a tu pinta">
-<meta property="og:description" content="Promos de sushi, handrolls y rolls armados a tu pinta. Arma tu pedido y envíalo por WhatsApp.">
-<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<meta property="og:title" content="Promo Sushi">
+<meta property="og:description" content="Promos de sushi, handrolls y rolls armados a tu pinta en Peñuelas, Coquimbo. Pide por WhatsApp.">
+<link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="192x192" href="img/icono-192.png">
 <link rel="apple-touch-icon" href="img/icono-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,9 +25,8 @@
 
 <header class="cabecera">
   <div class="contenedor cabecera-fila">
-    <a class="marca" href="#inicio" aria-label="Ir al inicio">
-      <img class="marca-logo" src="img/logo.svg" width="96" height="96" alt="">
-      <span class="marca-texto"><b data-dato="nombre">Sushi</b><small data-dato="lema">Ármalos a tu pinta</small></span>
+    <a class="marca" href="#inicio" aria-label="Promo Sushi, ir al inicio">
+      <img class="marca-logo marca-logo--ancho" src="img/logo.png" width="399" height="240" alt="Promo Sushi">
     </a>
     <nav class="menu" aria-label="Secciones">
       <a href="#carta">Carta</a>
@@ -64,7 +63,7 @@
           <div data-si="direccion" hidden><dt>Dónde</dt><dd data-dato="direccion-ciudad"></dd></div>
           <div data-si="horario" hidden><dt>Horario</dt><dd data-dato="horario"></dd></div>
         </dl>
-        <p class="portada-nota" data-si="horario" hidden>Estado según el horario publicado; puede variar, confirma por WhatsApp.</p>
+        <p class="portada-nota" data-si="horario" data-dato="nota-horario" hidden></p>
       </div>
       <div class="destacados" data-destacados></div>
     </div>
@@ -135,18 +134,18 @@
   <section class="ubicacion" id="ubicacion" aria-labelledby="ubicacion-titulo" data-si="direccion" hidden>
     <div class="contenedor ubicacion-grilla">
       <div>
-        <h2 class="titulo-grande" id="ubicacion-titulo">Aquí <span class="acento">estamos.</span></h2>
+        <h2 class="titulo-grande" id="ubicacion-titulo">Te esperamos <span class="acento">en <span data-dato="sector">Peñuelas</span>.</span></h2>
         <ul class="datos-local">
           <li>
             <svg class="icono icono--acento" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
-            <div><b data-dato="direccion"></b><span><span data-dato="ciudad"></span><span data-si="region">, <span data-dato="region"></span></span></span></div>
+            <div><b data-dato="direccion"></b><span><span data-dato="sector-ciudad"></span><span data-si="region">, <span data-dato="region"></span></span></span></div>
           </li>
           <li data-si="horario">
             <svg class="icono icono--acento icono--circulo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 8v4l2.5 2"/></svg>
             <div data-horario-largo></div>
           </li>
         </ul>
-        <p class="nota-chica" data-si="horario">Confirma el horario por WhatsApp antes de venir.</p>
+        <p class="nota-chica" data-si="horario" data-dato="nota-horario"></p>
         <a class="boton boton--oscuro" data-mapa data-si="mapa" href="#" target="_blank" rel="noopener">Abrir en Google Maps <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
       <figure class="mapa">
@@ -173,11 +172,11 @@
   <div class="contenedor">
     <div class="pie-fila">
       <div class="pie-marca">
-        <img class="marca-logo" src="img/logo.svg" width="96" height="96" alt="">
-        <span class="marca-texto"><b data-dato="nombre">Sushi</b><small data-dato="lema">Ármalos a tu pinta</small></span>
+        <img class="marca-logo marca-logo--ancho" src="img/logo.png" width="399" height="240" alt="Promo Sushi">
         <span class="pie-lema">Pedidos por WhatsApp: <span data-dato="whatsapp">+56 9 5471 7526</span></span>
       </div>
       <nav class="pie-enlaces" aria-label="Redes">
+        <a data-facebook data-si="facebook" hidden href="#" target="_blank" rel="noopener">Facebook <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a data-instagram data-si="instagram" hidden href="#" target="_blank" rel="noopener">Instagram <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a data-wsp href="https://wa.me/56954717526" target="_blank" rel="noopener">WhatsApp <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </nav>

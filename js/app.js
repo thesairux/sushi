@@ -199,8 +199,11 @@
     return rangos((C.horario || {})[DIAS[dia]]);
   }
   var CON_HORARIO = !!C.horario && Object.keys(C.horario).some(function (k) { return rangos(C.horario[k]).length > 0; });
+  // Con "horarioConfirmado": false el horario solo se muestra: no hay abierto/cerrado ni se bloquean pedidos.
+  var HORARIO_ACTIVO = CON_HORARIO && C.horarioConfirmado !== false;
+  function direccionCompleta() { return [N.direccion, N.sector].filter(Boolean).join(", "); }
   function estadoLocal() {
-    if (!CON_HORARIO) return { abierto: true, texto: "", sinHorario: true };
+    if (!HORARIO_ACTIVO) return { abierto: true, texto: "", sinHorario: true };
     var t = ahora();
     var i, r;
     var ayer = horarioDel(fechaMas(t.fecha, -1), (t.dia + 6) % 7);
@@ -254,11 +257,17 @@
 
   /* ---------- datos del local en la página ---------- */
   function pintarDatos() {
-    var direccionCiudad = [N.direccion, N.ciudad].filter(Boolean).join(", ");
+    var direccionCiudad = [N.direccion, N.sector, N.ciudad].filter(Boolean).join(", ");
     var datos = {
       nombre: N.nombre, lema: N.lema, direccion: N.direccion, ciudad: N.ciudad, region: N.region,
       "direccion-ciudad": direccionCiudad, horario: horarioCorto(),
       instagram: N.instagram ? "@" + N.instagram : "",
+      facebook: N.facebook,
+      sector: N.sector || N.ciudad,
+      "sector-ciudad": [N.sector, N.ciudad].filter(Boolean).join(", "),
+      "nota-horario": !CON_HORARIO ? "" : HORARIO_ACTIVO
+        ? "Estado según el horario publicado; puede variar, confirma por WhatsApp."
+        : "Horario referencial, por confirmar. Escríbenos por WhatsApp antes de venir.",
       mapa: N.mapa,
       whatsapp: N.whatsappVisible || (N.whatsapp ? "+" + N.whatsapp : "")
     };
@@ -270,10 +279,11 @@
     $$("[data-si]").forEach(function (el) { el.hidden = !datos[el.getAttribute("data-si")]; });
     $$("[data-wsp]").forEach(function (a) { a.href = wsp(""); });
     if (N.instagram) $$("[data-instagram]").forEach(function (a) { a.href = "https://www.instagram.com/" + N.instagram + "/"; });
+    if (N.facebook) $$("[data-facebook]").forEach(function (a) { a.href = N.facebook; });
     if (N.mapa) $$("[data-mapa]").forEach(function (a) { a.href = N.mapa; });
     var mapa = $("[data-mapa-embed]");
     if (mapa && N.direccion && !$("#ubicacion").hidden) {
-      mapa.src = "https://www.google.com/maps?q=" + encodeURIComponent([N.nombre, N.direccion, N.ciudad, "Chile"].filter(Boolean).join(", ")) + "&output=embed";
+      mapa.src = "https://www.google.com/maps?q=" + encodeURIComponent([N.direccion, N.sector, N.ciudad, "Chile"].filter(Boolean).join(", ")) + "&output=embed";
     }
     var largo = $("[data-horario-largo]");
     if (largo) largo.innerHTML = horarioLargo();
@@ -905,7 +915,7 @@
       "</div></fieldset>";
     if (pedido.modo === "retiro") {
       html += '<div class="retiro-info">' + (N.direccion
-        ? "<b>Retiras en " + esc(N.direccion) + "</b>" + (CON_HORARIO ? "<span>" + esc(horarioCorto()) + "</span>" : "")
+        ? "<b>Retiras en " + esc(direccionCompleta()) + "</b>" + (CON_HORARIO ? "<span>" + esc(horarioCorto()) + (HORARIO_ACTIVO ? "" : " (por confirmar)") + "</span>" : "")
         : "<b>Retiro en el local</b><span>Te confirmamos la dirección y la hora de retiro por WhatsApp.</span>") +
         (N.mapa ? '<a href="' + esc(N.mapa) + '" target="_blank" rel="noopener">Ver cómo llegar</a>' : "") + "</div>";
     } else {
@@ -914,7 +924,7 @@
         '<span class="campo-ayuda" data-ayuda="direccion"></span></label>' +
         '<div class="campo"><button class="ubicacion-boton" type="button" data-ubicacion>' + icono("ubicacion") + (pedido.ubicacion ? "Actualizar mi ubicación" : "Usar mi ubicación") + "</button>" +
         '<span class="ubicacion-estado' + (pedido.ubicacion ? " ok" : "") + '" data-ubicacion-estado>' +
-        esc(ubicacionMsg || "Si estás donde quieres recibirlo, comparte tu ubicación para el repartidor. El valor del despacho te lo confirmamos por WhatsApp.") + "</span></div>" +
+        esc(ubicacionMsg || "Si estás donde quieres recibirlo, comparte tu ubicación para el repartidor. El valor del despacho " + (N.notaDelivery ? "va " + minus(N.notaDelivery) + " y " : "") + "te lo confirmamos por WhatsApp.") + "</span></div>" +
         '<fieldset class="campo"><legend class="campo-titulo">¿Cómo pagas el delivery?</legend><div class="dos">' +
           ["Efectivo", "Transferencia"].map(function (m) {
             return '<label class="radio-tarjeta' + (pedido.pago === m ? " sel" : "") + '"><input type="radio" name="pago" value="' + m + '"' + (pedido.pago === m ? " checked" : "") + "> " + m + "</label>";
@@ -950,7 +960,7 @@
     var html = '<div class="totales">';
     if (pedido.modo === "delivery") {
       html += "<div><span>Subtotal referencial" + (fijo ? "" : " (sin delivery)") + "</span><b>" + plata(sub) + "</b></div>" +
-        "<div><span>Delivery</span><span>" + (fijo ? plata(N.valorDelivery) : "Por confirmar") + "</span></div>" +
+        "<div><span>Delivery</span><span>" + (fijo ? plata(N.valorDelivery) : esc(N.notaDelivery || "Por confirmar")) + "</span></div>" +
         (fijo ? "<div><span>Total referencial</span><b>" + plata(sub + N.valorDelivery) + "</b></div>" : "");
     } else {
       html += "<div><span>Subtotal referencial</span><b>" + plata(sub) + "</b></div>";
@@ -1056,12 +1066,12 @@
     l.push("Hola, quiero hacer un pedido:");
     l.push("Nombre: " + pedido.nombre.trim());
     if (pedido.modo === "retiro") {
-      l.push("Modalidad: Retiro en el local" + (N.direccion ? " (" + N.direccion + ")" : ""));
+      l.push("Modalidad: Retiro en el local" + (N.direccion ? " (" + direccionCompleta() + ")" : ""));
     } else {
       l.push("Modalidad: Delivery (consultar cobertura y costo)");
       l.push("Dirección: " + pedido.direccion.trim());
       if (pedido.ubicacion) l.push("Ubicación: https://maps.google.com/?q=" + pedido.ubicacion.lat + "," + pedido.ubicacion.lng);
-      l.push("Delivery: " + (typeof N.valorDelivery === "number" ? plata(N.valorDelivery) : "valor por confirmar (no incluido en el subtotal)"));
+      l.push("Delivery: " + (typeof N.valorDelivery === "number" ? plata(N.valorDelivery) : "valor " + (N.notaDelivery ? minus(N.notaDelivery) + ", " : "") + "por confirmar (no incluido en el subtotal)"));
       l.push("Pago: " + pedido.pago);
     }
     l.push("");

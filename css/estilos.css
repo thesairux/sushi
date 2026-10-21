@@ -98,6 +98,7 @@ ul, ol { padding: 0; list-style: none; }
 .cabecera-fila { display: flex; align-items: center; gap: 24px; height: calc(var(--alto-cabecera) - 2px); }
 .marca { display: flex; align-items: center; gap: 12px; text-decoration: none; margin-right: auto; }
 .marca-logo { width: 62px; height: 62px; border-radius: 50%; }
+.marca-logo--ancho { width: auto; height: 76px; border-radius: 0; }
 .marca-texto { display: flex; flex-direction: column; line-height: 1.05; }
 .marca-texto b { font-size: 1.45rem; font-weight: 700; letter-spacing: -.02em; }
 .marca-texto small { font-size: .8rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin-top: 3px; }
@@ -377,6 +378,7 @@ ul, ol { padding: 0; list-style: none; }
 .pie-fila { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding-bottom: 22px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
 .pie-marca { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .pie-marca .marca-logo { width: 46px; height: 46px; }
+.pie-marca .marca-logo--ancho { width: auto; height: 56px; }
 .pie-marca .marca-texto b { font-size: 1.15rem; }
 .pie-marca .marca-texto small { font-size: .74rem; }
 .pie-lema { margin-left: 12px; font-size: .85rem; color: #cfc8d4; }
@@ -549,6 +551,7 @@ dialog::backdrop { background: rgba(18, 16, 22, .55); }
   :root { --alto-cabecera: 66px; }
   html { scroll-padding-top: calc(var(--alto-cabecera) + 58px); }
   .marca-logo { width: 46px; height: 46px; }
+  .marca-logo--ancho { width: auto; height: 60px; }
   .marca-texto b { font-size: 1.15rem; }
   .marca-texto small { font-size: .72rem; }
   .boton-pedido-texto { display: none; }

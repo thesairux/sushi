@@ -8,6 +8,8 @@
   - Los precios van sin punto ni signo: 14500 (no "$14.500").
   - Horario: "13:00-22:00" o "cerrado". Para dos turnos: "12:00-15:30, 19:00-23:00".
     Si "horario" queda en null, la página no muestra abierto/cerrado y siempre deja pedir.
+  - horarioConfirmado: con false el horario solo se muestra como referencia ("por confirmar"):
+    no aparece abierto/cerrado ni se bloquean pedidos. Cámbialo a true cuando esté confirmado.
   - diasCerrados: fechas en que no se atiende aunque el horario diga abierto. Ej: ["2026-12-25"].
   - Lo que quede vacío ("") no se muestra: por ejemplo, sin "direccion" no aparece la sección Ubicación.
   - Producto agotado: agrega "disponible": false
@@ -23,20 +25,32 @@
 */
 window.CARTA = {
   "negocio": {
-    "nombre": "Sushi",
+    "nombre": "Promo Sushi",
     "lema": "Ármalos a tu pinta",
     "whatsapp": "56954717526",
     "whatsappVisible": "+56 9 5471 7526",
+    "facebook": "https://www.facebook.com/p/Promo-Sushi-100063526634812/",
     "instagram": "",
-    "direccion": "",
-    "ciudad": "",
+    "direccion": "Río Hurtado 861",
+    "sector": "Peñuelas",
+    "ciudad": "Coquimbo",
     "region": "",
-    "mapa": "",
+    "mapa": "https://www.google.com/maps/search/?api=1&query=R%C3%ADo+Hurtado+861%2C+Pe%C3%B1uelas%2C+Coquimbo%2C+Chile",
     "cartaReferencial": true,
     "valorDelivery": null,
+    "notaDelivery": "Según el sector",
     "datosTransferencia": null
   },
-  "horario": null,
+  "horario": {
+    "lunes": "14:00-23:00",
+    "martes": "14:00-23:00",
+    "miercoles": "14:00-23:00",
+    "jueves": "14:00-23:00",
+    "viernes": "14:00-23:00",
+    "sabado": "14:00-23:00",
+    "domingo": "14:00-23:00"
+  },
+  "horarioConfirmado": false,
   "diasCerrados": [],
   "secciones": [
     {
