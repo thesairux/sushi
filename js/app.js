@@ -1010,7 +1010,13 @@
     } else if (el.hasAttribute("data-editar") && it) {
       abrirFicha(it.id, it.uid);
     } else if (el.hasAttribute("data-vaciar")) {
-      if (window.confirm("¿Vaciar el pedido?")) { pedido.items = []; cambioPedido(); }
+      // se confirma con un segundo toque, sin ventanas del navegador
+      if (el.getAttribute("data-vaciar") === "seguro") { pedido.items = []; cambioPedido(); return; }
+      el.setAttribute("data-vaciar", "seguro");
+      el.textContent = "Toca otra vez para vaciar el pedido";
+      setTimeout(function () {
+        if (el.isConnected) { el.setAttribute("data-vaciar", ""); el.textContent = "Vaciar pedido"; }
+      }, 4000);
     } else if (el.hasAttribute("data-ir-carta")) {
       cerrar(dlgPedido);
     } else if (el.hasAttribute("data-ubicacion")) {

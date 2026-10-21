@@ -51,6 +51,8 @@ ul, ol { padding: 0; list-style: none; }
 
 .contenedor { width: min(100% - 32px, var(--ancho)); margin-inline: auto; }
 .oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* en celulares con notch, la franja de arriba queda del color de la cabecera */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 31; background: var(--tinta-2); }
 .saltar { position: absolute; left: 16px; top: -60px; z-index: 100; background: var(--blanco); padding: 10px 16px; font-weight: 700; }
 .saltar:focus { top: 12px; }
 
@@ -89,7 +91,7 @@ ul, ol { padding: 0; list-style: none; }
 
 /* ---------- cabecera ---------- */
 .cabecera {
-  position: sticky; top: 0; z-index: 30;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
   background: var(--tinta-2);
   color: var(--blanco);
   border-bottom: 2px solid var(--acento);
@@ -230,7 +232,7 @@ ul, ol { padding: 0; list-style: none; }
   background: var(--principal); color: var(--blanco); font: italic 700 .75rem/1 Georgia, serif;
 }
 .secciones {
-  position: sticky; top: var(--alto-cabecera); z-index: 20; margin-top: 18px;
+  position: sticky; top: calc(var(--alto-cabecera) + env(safe-area-inset-top, 0px)); z-index: 20; margin-top: 18px;
   transition: background .2s;
 }
 .secciones.pegada { background: rgba(248, 247, 245, .97); box-shadow: 0 1px 0 var(--linea); backdrop-filter: blur(6px); }
