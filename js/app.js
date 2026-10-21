@@ -1,4 +1,4 @@
-/* Mónaco: carta, pedido y envío por WhatsApp.
+/* Carta, pedido y envío por WhatsApp.
    Los productos, precios y el horario están en carta.js. */
 (function () {
   "use strict";
@@ -7,11 +7,10 @@
   if (!C) return;
   var N = C.negocio || {};
   var ZONA = "America/Santiago";
-  var GUARDADO = "monaco-pedido-v1";
+  var GUARDADO = "sushi-pedido-v1";
   var DIAS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
   var DIAS_TXT = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
   var DIAS_CORTO = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
-  var FRASES = ["rico?", "sabroso?", "fresco?", "perfecto?"];
 
   /* ---------- utilidades ---------- */
   function $(sel, raiz) { return (raiz || document).querySelector(sel); }
@@ -60,8 +59,16 @@
   }
   function gruposProducto(id) { return gruposDe(id).filter(function (g) { return !g.porRoll; }); }
   function gruposRoll(id) { return gruposDe(id).filter(function (g) { return g.porRoll; }); }
+  /* Grupos que se eligen en cada roll (proteína, relleno, envoltura) y grupos de cambios opcionales. */
+  function gruposArmado(id) { return gruposRoll(id).filter(function (g) { return g.tipo === "elegir"; }); }
+  function gruposCambio(id) { return gruposRoll(id).filter(function (g) { return g.tipo !== "elegir"; }); }
   function rollsDe(id) {
     var p = PRODUCTOS[id].p;
+    if (typeof p.rolls === "number" && p.rolls > 0) {
+      var lista = [];
+      for (var i = 0; i < Math.min(Math.floor(p.rolls), 30); i++) lista.push({});
+      return lista;
+    }
     if (p.rolls && p.rolls.length) return p.rolls;
     return gruposRoll(id).length ? [{}] : [];
   }
@@ -81,8 +88,26 @@
     var varia = lista.some(function (v) { return v !== min; });
     return { valor: min, desde: varia };
   }
+  /* Lo elegido en cada roll con lo que se cobra. Con "gratis" en el grupo, las primeras opciones con precio no se cobran. */
+  function detalleArmado(id, conf) {
+    var armado = conf.armado || [];
+    var filas = armado.map(function () { return {}; });
+    gruposArmado(id).forEach(function (g) {
+      var gratis = g.gratis || 0;
+      armado.forEach(function (r, i) {
+        var o = r && opcionDe(g.id, r[g.id]);
+        if (!o) return;
+        var cobro = o.precio || 0;
+        var libre = false;
+        if (cobro > 0 && gratis > 0) { gratis--; cobro = 0; libre = true; }
+        filas[i][g.id] = { o: o, cobro: cobro, gratis: libre };
+      });
+    });
+    return filas;
+  }
   function precioUnitario(id, conf) {
     var total = precioBase(PRODUCTOS[id].p, conf.opcion);
+    detalleArmado(id, conf).forEach(function (f) { Object.keys(f).forEach(function (k) { total += f[k].cobro; }); });
     (conf.cambios || []).forEach(function (c) { var o = opcionDe(c.grupo, c.opcion); if (o) total += o.precio || 0; });
     var el = conf.elecciones || {};
     Object.keys(el).forEach(function (g) {
@@ -110,6 +135,15 @@
   function detalleConf(id, conf) {
     var lineas = [];
     var varios = rollsDe(id).length > 1;
+    var ga = gruposArmado(id);
+    var armado = detalleArmado(id, conf);
+    armado.forEach(function (f, i) {
+      var partes = ga.filter(function (g) { return f[g.id]; }).map(function (g) {
+        var x = f[g.id];
+        return g.nombre + ": " + x.o.nombre + (x.cobro ? " +" + plata(x.cobro) : x.gratis ? " (gratis)" : "");
+      });
+      if (partes.length) lineas.push({ texto: (armado.length > 1 ? "Roll " + (i + 1) : "Tu roll") + ": " + partes.join(" · "), armado: true });
+    });
     (conf.cambios || []).forEach(function (c, i) {
       lineas.push({ texto: (varios ? "Roll " + (c.roll + 1) + ": " : "") + textoCambio(c), cambio: i, roll: varios ? c.roll + 1 : 0, solo: textoCambio(c) });
     });
@@ -164,7 +198,9 @@
     if ((C.diasCerrados || []).indexOf(fecha) >= 0) return [];
     return rangos((C.horario || {})[DIAS[dia]]);
   }
+  var CON_HORARIO = !!C.horario && Object.keys(C.horario).some(function (k) { return rangos(C.horario[k]).length > 0; });
   function estadoLocal() {
+    if (!CON_HORARIO) return { abierto: true, texto: "", sinHorario: true };
     var t = ahora();
     var i, r;
     var ayer = horarioDel(fechaMas(t.fecha, -1), (t.dia + 6) % 7);
@@ -202,6 +238,7 @@
     return tramos;
   }
   function horarioCorto() {
+    if (!CON_HORARIO) return "";
     return tramosHorario().map(function (t) {
       return mayus(DIAS_CORTO[t.desde] + (t.hasta !== t.desde ? "–" + DIAS_CORTO[t.hasta] : "")) + " " + (t.v || "cerrado");
     }).join(" · ");
@@ -219,19 +256,23 @@
   function pintarDatos() {
     var direccionCiudad = [N.direccion, N.ciudad].filter(Boolean).join(", ");
     var datos = {
-      nombre: N.nombre, direccion: N.direccion, ciudad: N.ciudad, region: N.region,
+      nombre: N.nombre, lema: N.lema, direccion: N.direccion, ciudad: N.ciudad, region: N.region,
       "direccion-ciudad": direccionCiudad, horario: horarioCorto(),
-      instagram: N.instagram ? "@" + N.instagram : ""
+      instagram: N.instagram ? "@" + N.instagram : "",
+      mapa: N.mapa,
+      whatsapp: N.whatsappVisible || (N.whatsapp ? "+" + N.whatsapp : "")
     };
     $$("[data-dato]").forEach(function (el) {
       var v = datos[el.getAttribute("data-dato")];
       if (v) el.textContent = v;
     });
+    // lo que no tiene datos (dirección, horario, Instagram) no se muestra
+    $$("[data-si]").forEach(function (el) { el.hidden = !datos[el.getAttribute("data-si")]; });
     $$("[data-wsp]").forEach(function (a) { a.href = wsp(""); });
     if (N.instagram) $$("[data-instagram]").forEach(function (a) { a.href = "https://www.instagram.com/" + N.instagram + "/"; });
     if (N.mapa) $$("[data-mapa]").forEach(function (a) { a.href = N.mapa; });
     var mapa = $("[data-mapa-embed]");
-    if (mapa && N.direccion) {
+    if (mapa && N.direccion && !$("#ubicacion").hidden) {
       mapa.src = "https://www.google.com/maps?q=" + encodeURIComponent([N.nombre, N.direccion, N.ciudad, "Chile"].filter(Boolean).join(", ")) + "&output=embed";
     }
     var largo = $("[data-horario-largo]");
@@ -244,7 +285,7 @@
   function pintarEstado() {
     var el = $("[data-estado]");
     if (!el) return;
-    el.hidden = estadoOculto;
+    el.hidden = estadoOculto || !!estado.sinHorario;
     el.className = "estado" + (estado.abierto ? " abierto" : "");
     el.innerHTML = '<span class="estado-punto" aria-hidden="true"></span><b>' + (estado.abierto ? "Abierto ahora" : "Cerrado ahora") + "</b>" +
       (estado.texto ? '<span class="estado-mas">' + esc(estado.texto) + "</span>" : "") +
@@ -286,7 +327,6 @@
             (i < carrusel.i ? "hecha" : i === carrusel.i ? "activa" : "") + '"><span><i></i></span></button>';
         }).join("") + "</div>" +
         '<button class="destacado-pausa" type="button" data-pausa aria-label="' + (carrusel.pausado ? "Reanudar" : "Pausar") + ' rotación de promociones">' + icono(carrusel.pausado ? "play" : "pausa") + "</button>" : "") +
-        '<p class="destacado-frase" aria-hidden="true">¿Así o más <span>' + FRASES[carrusel.i % FRASES.length] + "</span></p>" +
         '<div class="destacado-foto"><img src="' + esc(p.foto) + '" alt="Foto de ' + esc(p.nombre) + '" width="1000" height="725"></div>' +
         '<div class="destacado-panel">' +
           '<span class="destacado-etiqueta">Promo destacada</span>' +
@@ -344,9 +384,10 @@
     }
     return lineas.length ? '<p class="fila-detalle">' + esc(lineas[0]) + "</p>" : "";
   }
+  function notaProducto(p) { return p.nota ? '<p class="fila-incluye">' + esc(p.nota) + "</p>" : ""; }
   function fila(p) {
     return '<li class="fila' + (p.disponible === false ? " fila--agotada" : "") + '">' +
-      '<div class="fila-texto"><h4 class="fila-nombre">' + esc(p.nombre) + "</h4>" + detalleLista(p) + "</div>" +
+      '<div class="fila-texto"><h4 class="fila-nombre">' + esc(p.nombre) + "</h4>" + detalleLista(p) + notaProducto(p) + "</div>" +
       '<div class="fila-lado"><span class="precio">' + precioLista(p) + "</span>" + botonAgregar(p, "fila") + "</div></li>";
   }
   function tarjeta(p) {
@@ -354,7 +395,7 @@
       ? '<div class="tarjeta-foto"><img src="' + esc(p.foto) + '" alt="Foto de ' + esc(p.nombre) + '" width="1000" height="725" loading="lazy"></div>'
       : '<div class="tarjeta-foto tarjeta-foto--vacia"><img src="img/logo.webp" alt="" width="64" height="64" loading="lazy"></div>';
     return '<li class="tarjeta' + (p.disponible === false ? " fila--agotada" : "") + '">' + foto +
-      '<div class="tarjeta-cuerpo"><h4 class="fila-nombre">' + esc(p.nombre) + "</h4>" + detalleLista(p) +
+      '<div class="tarjeta-cuerpo"><h4 class="fila-nombre">' + esc(p.nombre) + "</h4>" + detalleLista(p) + notaProducto(p) +
       '<div class="tarjeta-pie"><span class="precio">' + precioLista(p) + "</span>" + botonAgregar(p, "tarjeta") + "</div></div></li>";
   }
   function bloque(cat, productos, titulo) {
@@ -373,7 +414,7 @@
       C.secciones.forEach(function (sec) {
         sec.categorias.forEach(function (cat) {
           var encontrados = cat.productos.filter(function (p) {
-            var texto = sinTildes([p.nombre, p.detalle, p.incluye, cat.nombre, sec.nombre, (p.opciones || []).join(" ")].join(" "));
+            var texto = sinTildes([p.nombre, p.detalle, p.incluye, p.nota, cat.nombre, sec.nombre, (p.opciones || []).join(" ")].join(" "));
             return palabras.every(function (w) { return texto.indexOf(w) >= 0; });
           });
           hay += encontrados.length;
@@ -382,7 +423,7 @@
       });
       if (!hay) {
         html = '<div class="bloque"><p class="bloque-vacio">No encontramos «' + esc(vista.busqueda) + '» en la carta. ' +
-          '<a href="' + esc(wsp("Hola, " + (N.nombre || "") + ". ¿Tienen " + vista.busqueda + "?")) + '" target="_blank" rel="noopener">Pregúntanos por WhatsApp</a>.</p></div>';
+          '<a href="' + esc(wsp("Hola, ¿tienen " + vista.busqueda + "?")) + '" target="_blank" rel="noopener">Pregúntanos por WhatsApp</a>.</p></div>';
       }
     } else {
       var sec = C.secciones[vista.seccion];
@@ -440,9 +481,21 @@
     Object.keys(conf.textos || {}).forEach(function (g) {
       if (grupos.indexOf(g) >= 0 && conf.textos[g]) limpia.textos[g] = String(conf.textos[g]).slice(0, 60);
     });
+    var ga = gruposArmado(id);
+    if (ga.length) {
+      limpia.armado = rollsDe(id).map(function (r, i) {
+        var orig = (conf.armado || [])[i] || {};
+        var x = {};
+        ga.forEach(function (g) {
+          var o = opcionDe(g.id, orig[g.id]);
+          if (o && o.disponible !== false) x[g.id] = o.id;
+        });
+        return x;
+      });
+    }
     return limpia;
   }
-  function claveConf(conf) { return JSON.stringify([conf.opcion || "", conf.cambios || [], conf.elecciones || {}, conf.textos || {}]); }
+  function claveConf(conf) { return JSON.stringify([conf.opcion || "", conf.cambios || [], conf.elecciones || {}, conf.textos || {}, conf.armado || []]); }
   function cantidadTotal() { return pedido.items.reduce(function (s, it) { return s + it.cant; }, 0); }
   function subtotal() { return pedido.items.reduce(function (s, it) { return s + precioUnitario(it.id, it.conf) * it.cant; }, 0); }
 
@@ -509,6 +562,17 @@
       var def = (g.opciones || []).filter(function (o) { return o.porDefecto && o.disponible !== false; }).map(function (o) { return o.id; });
       if (def.length) conf.elecciones[g.id] = def.slice(0, g.max || 1);
     });
+    var ga = gruposArmado(id);
+    if (ga.length) {
+      conf.armado = rollsDe(id).map(function () {
+        var x = {};
+        ga.forEach(function (g) {
+          var def = (g.opciones || []).filter(function (o) { return o.porDefecto && o.disponible !== false; })[0];
+          if (def) x[g.id] = def.id;
+        });
+        return x;
+      });
+    }
     return conf;
   }
   function abrirFicha(id, uid) {
@@ -524,8 +588,15 @@
     for (var i = 0; i < grupos.length; i++) {
       var g = grupos[i];
       var min = g.min || 0;
-      if (g.tipo === "texto") { if (min && !String((conf.textos || {})[g.id] || "").trim()) return g; continue; }
-      if (((conf.elecciones || {})[g.id] || []).length < min) return g;
+      if (g.tipo === "texto") { if (min && !String((conf.textos || {})[g.id] || "").trim()) return { g: g }; continue; }
+      if (((conf.elecciones || {})[g.id] || []).length < min) return { g: g };
+    }
+    var ga = gruposArmado(ficha.id);
+    var rolls = rollsDe(ficha.id);
+    for (var r = 0; r < rolls.length; r++) {
+      for (var k = 0; k < ga.length; k++) {
+        if ((ga[k].min || 0) > 0 && !((conf.armado || [])[r] || {})[ga[k].id]) return { g: ga[k], roll: r };
+      }
     }
     return null;
   }
@@ -534,7 +605,10 @@
     var falta = faltante();
     var total = precioUnitario(ficha.id, ficha.conf);
     b.setAttribute("aria-disabled", falta ? "true" : "false");
-    if (falta) b.innerHTML = (falta.tipo === "texto" ? "Escribe " : "Elige ") + esc(minus(falta.nombre));
+    if (falta) {
+      b.innerHTML = (falta.g.tipo === "texto" ? "Escribe " : "Elige ") + esc(minus(falta.g.nombre)) +
+        (falta.roll != null && rollsDe(ficha.id).length > 1 ? " del roll " + (falta.roll + 1) : "");
+    }
     else b.innerHTML = (ficha.uid ? "Guardar cambios por" : "Agregar por") + " <b>" + plata(total) + "</b> " + icono("flecha");
   }
   function grupoHtml(g) {
@@ -563,7 +637,7 @@
     var roll = rollsDe(ficha.id)[i];
     var cambios = ficha.conf.cambios.filter(function (c) { return c.roll === i; });
     var acciones = [];
-    gruposRoll(ficha.id).forEach(function (g) {
+    gruposCambio(ficha.id).forEach(function (g) {
       if (g.tipo === "agregar") {
         var hechos = cambios.filter(function (c) { return c.grupo === g.id && !c.en; }).length;
         acciones.push({ id: "agregar:" + g.id, texto: "Agregar", lleno: g.max && hechos >= g.max });
@@ -606,7 +680,25 @@
     var cambios = ficha.conf.cambios.map(function (c, k) { return { c: c, k: k }; }).filter(function (x) { return x.c.roll === i; });
     var texto = roll.texto || (total === 1 ? p.detalle || "" : "");
     var html = '<div class="roll' + (abierto ? " abierto" : "") + '">' +
-      '<p class="roll-titulo"><b>' + (total > 1 ? "Roll " + (i + 1) : "Tu " + esc(minus(PRODUCTOS[ficha.id].cat.nombre.replace(/s$/, "")))) + "</b> " + esc(texto) + "</p>";
+      '<p class="roll-titulo"><b>' + (total > 1 ? "Roll " + (i + 1) : "Tu roll") + "</b> " + esc(texto) + "</p>";
+    var ga = gruposArmado(ficha.id);
+    if (ga.length) {
+      var elegido = (ficha.conf.armado || [])[i] || {};
+      var cobros = detalleArmado(ficha.id, ficha.conf)[i] || {};
+      html += '<div class="armado">' + ga.map(function (g) {
+        var x = cobros[g.id];
+        return '<label class="armado-campo"><span>' + esc(g.nombre) + "</span>" +
+          '<select data-armado="' + i + '" data-grupo-roll="' + esc(g.id) + '"' + (elegido[g.id] ? "" : ' class="vacio"') + ">" +
+          '<option value="">Elige…</option>' + (g.opciones || []).filter(function (o) { return o.disponible !== false; }).map(function (o) {
+            return '<option value="' + esc(o.id) + '"' + (elegido[g.id] === o.id ? " selected" : "") + ">" + esc(o.nombre) + "</option>";
+          }).join("") + "</select>" +
+          (x && x.gratis ? '<small class="armado-gratis">Gratis</small>' : x && x.cobro ? "<small>+" + plata(x.cobro) + "</small>" : "") +
+          "</label>";
+      }).join("") + "</div>";
+      var completo = ga.every(function (g) { return elegido[g.id]; });
+      var faltan = (ficha.conf.armado || []).some(function (r, k) { return k !== i && ga.some(function (g) { return !(r || {})[g.id]; }); });
+      if (total > 1 && completo && faltan) html += '<button class="copiar" type="button" data-copiar="' + i + '">Repetir este roll en los que faltan</button>';
+    }
     if (cambios.length) {
       html += '<ul class="roll-cambios">' + cambios.map(function (x) {
         return "<li><span>" + esc(textoCambio(x.c)) + '</span><button class="quitar" type="button" data-quitar-cambio="' + x.k + '" aria-label="Quitar: ' + esc(textoCambio(x.c)) + '">' + icono("x") + "</button></li>";
@@ -640,6 +732,7 @@
     if (p.detalle && !lineasEnRolls && !(rolls.length === 1 && !rolls[0].texto && gruposRoll(ficha.id).length)) {
       html += '<p class="ficha-detalle">' + esc(p.detalle) + "</p>";
     }
+    if (p.nota) html += '<p class="ficha-nota">' + esc(p.nota) + "</p>";
     if (p.incluye) html += '<div class="incluye"><p class="incluye-titulo">Incluye</p><p>' + icono("check") + esc(p.incluye) + "</p></div>";
     if (tieneOpciones(p)) {
       html += '<fieldset class="grupo"><legend>Elige una opción</legend>' + p.opciones.map(function (o) {
@@ -651,24 +744,38 @@
     }
     gruposProducto(ficha.id).forEach(function (g) { html += grupoHtml(g); });
     if (rolls.length) {
-      var tipos = gruposRoll(ficha.id).map(function (g) { return g.tipo; });
-      var puede = [];
-      if (tipos.indexOf("agregar") >= 0) puede.push("agregar o cambiar ingredientes");
-      if (tipos.indexOf("envoltura") >= 0) puede.push("cambiar la envoltura");
-      html += '<div class="rolls"><h3>¿Quieres cambiar algo?</h3><p class="rolls-ayuda">Opcional.' +
-        (puede.length ? " " + (rolls.length > 1 ? "En cada roll puedes " : "Puedes ") + puede.join(" y ") + ";" : "") +
-        " cada cambio se cobra a precio de carta.</p>" +
-        rolls.map(function (r, i) { return rollHtml(r, i, rolls.length, p); }).join("") + "</div>";
+      var ga = gruposArmado(ficha.id);
+      if (ga.length) {
+        var ayudas = [x.cat.ayuda].concat(ga.map(function (g) { return g.ayuda; })).filter(Boolean);
+        html += '<div class="rolls"><h3>' + (rolls.length > 1 ? "Arma tus " + rolls.length + " rolls" : "Arma tu roll") + "</h3>" +
+          (ayudas.length ? '<p class="rolls-ayuda">' + ayudas.map(esc).join(" ") + "</p>" : "");
+      } else {
+        var tipos = gruposCambio(ficha.id).map(function (g) { return g.tipo; });
+        var puede = [];
+        if (tipos.indexOf("agregar") >= 0) puede.push("agregar o cambiar ingredientes");
+        if (tipos.indexOf("envoltura") >= 0) puede.push("cambiar la envoltura");
+        html += '<div class="rolls"><h3>¿Quieres cambiar algo?</h3><p class="rolls-ayuda">Opcional.' +
+          (puede.length ? " " + (rolls.length > 1 ? "En cada roll puedes " : "Puedes ") + puede.join(" y ") + ";" : "") +
+          " cada cambio se cobra a precio de carta.</p>";
+      }
+      html += rolls.map(function (r, i) { return rollHtml(r, i, rolls.length, p); }).join("") + "</div>";
     }
+    // al volver a pintar, el foco queda en el mismo campo
+    var activo = document.activeElement;
+    var foco = activo && cuerpoFicha.contains(activo) && activo.getAttribute("data-armado") != null
+      ? '[data-armado="' + activo.getAttribute("data-armado") + '"][data-grupo-roll="' + activo.getAttribute("data-grupo-roll") + '"]' : null;
     var scroll = cuerpoFicha.scrollTop;
     cuerpoFicha.innerHTML = html;
     cuerpoFicha.scrollTop = scroll;
+    if (foco && $(foco, cuerpoFicha)) $(foco, cuerpoFicha).focus({ preventScroll: true });
     pintarPieFicha();
   }
   function confirmarFicha() {
     var falta = faltante();
     if (falta) {
-      var campo = $('[data-grupo="' + falta.id + '"], [data-texto="' + falta.id + '"]', cuerpoFicha);
+      var campo = falta.roll != null
+        ? $('[data-armado="' + falta.roll + '"][data-grupo-roll="' + falta.g.id + '"]', cuerpoFicha)
+        : $('[data-grupo="' + falta.g.id + '"], [data-texto="' + falta.g.id + '"]', cuerpoFicha);
       if (campo) { campo.scrollIntoView({ block: "center", behavior: "smooth" }); campo.focus({ preventScroll: true }); }
       return;
     }
@@ -688,6 +795,15 @@
     var t = e.target;
     if (!ficha) return;
     if (t.hasAttribute("data-opcion")) { ficha.conf.opcion = t.value; pintarFicha(); return; }
+    if (t.hasAttribute("data-armado")) {
+      var r = +t.getAttribute("data-armado");
+      if (!ficha.conf.armado) ficha.conf.armado = [];
+      var elegido = ficha.conf.armado[r] = ficha.conf.armado[r] || {};
+      if (t.value) elegido[t.getAttribute("data-grupo-roll")] = t.value;
+      else delete elegido[t.getAttribute("data-grupo-roll")];
+      pintarFicha();
+      return;
+    }
     var gid = t.getAttribute("data-grupo");
     if (gid) {
       var g = GRUPOS[gid];
@@ -709,7 +825,13 @@
   cuerpoFicha.addEventListener("click", function (e) {
     var b = e.target.closest("button");
     if (!b || !ficha) return;
-    if (b.hasAttribute("data-roll")) {
+    if (b.hasAttribute("data-copiar")) {
+      var base = ficha.conf.armado[+b.getAttribute("data-copiar")];
+      ficha.conf.armado.forEach(function (r) {
+        Object.keys(base).forEach(function (g) { if (!r[g]) r[g] = base[g]; });
+      });
+      pintarFicha();
+    } else if (b.hasAttribute("data-roll")) {
       ficha.roll = +b.getAttribute("data-roll");
       var primera = accionesRoll(ficha.roll).filter(function (a) { return !a.lleno && !a.directo; })[0];
       ficha.accion = primera ? primera.id : null;
@@ -768,7 +890,7 @@
         '<button type="button" data-menos aria-label="' + (it.cant === 1 ? "Quitar " : "Uno menos de ") + esc(x.p.nombre) + '">−</button>' +
         '<span aria-live="polite">' + it.cant + "</span>" +
         '<button type="button" data-mas aria-label="Uno más de ' + esc(x.p.nombre) + '">+</button></div>' +
-        '<label class="campo"><span>' + (editable ? "¿Quieres consultar un cambio?" : "¿Algo que debamos saber?") + "</span>" +
+        '<label class="campo"><span>¿Algo que debamos saber?</span>' +
         '<input type="text" data-nota maxlength="140" placeholder="Deja una nota (opcional)" value="' + esc(it.nota) + '"></label>' +
       "</div></li>";
   }
@@ -782,7 +904,9 @@
         '<label class="radio-tarjeta' + (pedido.modo === "delivery" ? " sel" : "") + '"><input type="radio" name="modo" value="delivery"' + (pedido.modo === "delivery" ? " checked" : "") + "> Consultar delivery</label>" +
       "</div></fieldset>";
     if (pedido.modo === "retiro") {
-      html += '<div class="retiro-info"><b>Retiras en ' + esc(N.direccion || "el local") + "</b><span>" + esc(horarioCorto()) + "</span>" +
+      html += '<div class="retiro-info">' + (N.direccion
+        ? "<b>Retiras en " + esc(N.direccion) + "</b>" + (CON_HORARIO ? "<span>" + esc(horarioCorto()) + "</span>" : "")
+        : "<b>Retiro en el local</b><span>Te confirmamos la dirección y la hora de retiro por WhatsApp.</span>") +
         (N.mapa ? '<a href="' + esc(N.mapa) + '" target="_blank" rel="noopener">Ver cómo llegar</a>' : "") + "</div>";
     } else {
       html += '<label class="campo"><span class="campo-titulo">Dirección de entrega</span>' +
@@ -790,7 +914,7 @@
         '<span class="campo-ayuda" data-ayuda="direccion"></span></label>' +
         '<div class="campo"><button class="ubicacion-boton" type="button" data-ubicacion>' + icono("ubicacion") + (pedido.ubicacion ? "Actualizar mi ubicación" : "Usar mi ubicación") + "</button>" +
         '<span class="ubicacion-estado' + (pedido.ubicacion ? " ok" : "") + '" data-ubicacion-estado>' +
-        esc(ubicacionMsg || "Si estás donde quieres recibirlo, comparte tu ubicación para el repartidor. El valor del despacho te lo confirma " + (N.nombre || "el local") + " por WhatsApp.") + "</span></div>" +
+        esc(ubicacionMsg || "Si estás donde quieres recibirlo, comparte tu ubicación para el repartidor. El valor del despacho te lo confirmamos por WhatsApp.") + "</span></div>" +
         '<fieldset class="campo"><legend class="campo-titulo">¿Cómo pagas el delivery?</legend><div class="dos">' +
           ["Efectivo", "Transferencia"].map(function (m) {
             return '<label class="radio-tarjeta' + (pedido.pago === m ? " sel" : "") + '"><input type="radio" name="pago" value="' + m + '"' + (pedido.pago === m ? " checked" : "") + "> " + m + "</label>";
@@ -832,7 +956,7 @@
       html += "<div><span>Subtotal referencial</span><b>" + plata(sub) + "</b></div>";
     }
     html += "</div>" +
-      '<p class="pedido-aviso">No pagas aquí: ' + esc(N.nombre || "el local") + " confirma disponibilidad, modalidad y total por WhatsApp." +
+      '<p class="pedido-aviso">No pagas aquí: te confirmamos disponibilidad, modalidad y total por WhatsApp.' +
       (estado.abierto ? "" : " Ahora estamos cerrados: te respondemos apenas abramos.") + "</p>";
     if (falta) html += '<button class="boton boton--grande" type="button" aria-disabled="true" data-falta="' + falta.campo + '">' + esc(falta.texto) + "</button>";
     else html += '<a class="boton boton--grande" href="' + esc(wsp(mensaje())) + '" target="_blank" rel="noopener" data-enviar>Enviar pedido por WhatsApp ' + icono("flecha") + "</a>";
@@ -929,7 +1053,7 @@
   /* ---------- mensaje de WhatsApp ---------- */
   function mensaje() {
     var l = [];
-    l.push("Hola, " + (N.nombre || "") + ". Quiero pedir:");
+    l.push("Hola, quiero hacer un pedido:");
     l.push("Nombre: " + pedido.nombre.trim());
     if (pedido.modo === "retiro") {
       l.push("Modalidad: Retiro en el local" + (N.direccion ? " (" + N.direccion + ")" : ""));
@@ -954,6 +1078,7 @@
       }
       detalleConf(it.id, it.conf).forEach(function (d) {
         if (d.cambio == null) l.push("   " + d.texto);
+        else if (d.armado) l.push("   " + d.texto);
         else l.push("   Cambio" + (d.roll ? " en roll " + d.roll : "") + ": " + d.solo);
       });
       if (it.nota.trim()) l.push("   Nota: " + it.nota.trim());
@@ -990,6 +1115,10 @@
       if (vista.busqueda) { vista.busqueda = ""; $("[data-buscar]").value = ""; }
       pintarCarta();
       subirALista();
+    } else if (t.hasAttribute("data-ir-seccion")) {
+      vista.seccion = +t.getAttribute("data-ir-seccion");
+      vista.categoria = null;
+      pintarCarta();
     } else if (t.hasAttribute("data-categoria")) {
       vista.categoria = t.getAttribute("data-categoria") || null;
       pintarCarta();
@@ -1041,8 +1170,34 @@
     }
   }, 60000);
 
+  /* ---------- sección "arma tu roll": opciones a la vista ---------- */
+  function pintarArmado() {
+    var caja = $("[data-armado-info]");
+    if (!caja) return;
+    var encontrado = null;
+    C.secciones.forEach(function (sec, si) {
+      sec.categorias.forEach(function (cat) {
+        if (encontrado) return;
+        var ga = (cat.personalizar || []).map(function (g) { return GRUPOS[g]; })
+          .filter(function (g) { return g && g.porRoll && g.tipo === "elegir"; });
+        if (ga.length) encontrado = { si: si, cat: cat, ga: ga };
+      });
+    });
+    var seccion = caja.closest("section");
+    if (!encontrado) { seccion.hidden = true; $$('a[href="#arma"]').forEach(function (a) { a.hidden = true; }); return; }
+    $("[data-armado-ayuda]").textContent = encontrado.cat.ayuda || "";
+    $("[data-armado-ir]").setAttribute("data-ir-seccion", encontrado.si);
+    caja.innerHTML = encontrado.ga.map(function (g) {
+      return '<div class="arma-grupo"><h3>' + esc(g.nombre + (/[aeiouáéíóú]$/i.test(g.nombre) ? "s" : "es")) + "</h3>" +
+        "<ul>" + (g.opciones || []).filter(function (o) { return o.disponible !== false; }).map(function (o) {
+          return "<li>" + esc(o.nombre) + (o.precio ? " <small>+" + plata(o.precio) + "</small>" : "") + "</li>";
+        }).join("") + "</ul>" + (g.ayuda ? '<p class="arma-promo">' + esc(g.ayuda) + "</p>" : "") + "</div>";
+    }).join("");
+  }
+
   /* ---------- inicio ---------- */
   pintarDatos();
+  pintarArmado();
   pintarEstado();
   pintarDestacados();
   pintarCarta();

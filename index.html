@@ -3,24 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
-<title>Mónaco Sushi y más — Chillán</title>
-<meta name="description" content="Sushi, sándwich y antojos para compartir en Mónaco, Chillán. Mira la carta y arma tu pedido por WhatsApp.">
-<meta name="theme-color" content="#121016">
+<title>Sushi a tu pinta | Promos y pedidos por WhatsApp</title>
+<meta name="description" content="Promos de sushi, handrolls y rolls armados a tu pinta. Arma tu pedido y envíalo por WhatsApp.">
+<meta name="theme-color" content="#121014">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Mónaco Sushi y más — Chillán">
-<meta property="og:description" content="Sushi, sándwich y antojos para compartir en Chillán. Mira la carta y arma tu pedido por WhatsApp.">
-<meta property="og:image" content="https://monacochillan.cl/img/compartir.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Logo de Mónaco Sushi y más">
-<link rel="icon" href="favicon.ico" sizes="any">
+<meta property="og:title" content="Sushi a tu pinta">
+<meta property="og:description" content="Promos de sushi, handrolls y rolls armados a tu pinta. Arma tu pedido y envíalo por WhatsApp.">
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="192x192" href="img/icono-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="img/icono-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
 <link rel="stylesheet" href="css/estilos.css">
-<!-- Productos, precios y horario: se editan en carta.js -->
+<!-- Productos, precios, horario y datos del local: se editan en carta.js -->
 <script src="carta.js" defer></script>
 <script src="js/app.js" defer></script>
 </head>
@@ -29,14 +25,15 @@
 
 <header class="cabecera">
   <div class="contenedor cabecera-fila">
-    <a class="marca" href="#inicio" aria-label="Mónaco Sushi y más, ir al inicio">
-      <img class="marca-logo" src="img/logo.webp" width="96" height="96" alt="">
-      <span class="marca-texto"><b>Mónaco</b><small>Sushi y más</small></span>
+    <a class="marca" href="#inicio" aria-label="Ir al inicio">
+      <img class="marca-logo" src="img/logo.svg" width="96" height="96" alt="">
+      <span class="marca-texto"><b data-dato="nombre">Sushi</b><small data-dato="lema">Ármalos a tu pinta</small></span>
     </a>
     <nav class="menu" aria-label="Secciones">
       <a href="#carta">Carta</a>
+      <a href="#arma">Arma tu roll</a>
       <a href="#como-pedir">Cómo pedir</a>
-      <a href="#ubicacion">Ubicación</a>
+      <a href="#ubicacion" data-si="direccion">Ubicación</a>
     </nav>
     <button class="boton-pedido" type="button" data-abrir-pedido aria-label="Mi pedido, 0 productos">
       <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
@@ -53,27 +50,28 @@
     <div class="contenedor portada-grilla">
       <div class="portada-texto">
         <p class="estado" data-estado hidden></p>
-        <h1 class="portada-titulo">¿Un <span class="brillo">sushito?</span></h1>
-        <p class="portada-bajada">Arma tu pedido con tus favoritos y mándanoslo por WhatsApp. Lo demás lo confirmamos contigo.</p>
+        <h1 class="portada-titulo">Sushi <span class="brillo">a tu pinta</span></h1>
+        <p class="portada-bajada">Elige una promo o arma tus rolls como más te gusten, y mándanos el pedido por WhatsApp. El resto lo confirmamos contigo.</p>
         <div class="portada-acciones">
           <a class="boton" href="#carta">Ver la carta <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <a class="enlace-wsp" data-wsp href="https://wa.me/56971431684" target="_blank" rel="noopener">
+          <a class="enlace-wsp" data-wsp href="https://wa.me/56954717526" target="_blank" rel="noopener">
             <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5 5.6 16A8 8 0 1 1 8.4 18.6Z"/><path d="M9.2 8.6c.3 2.7 2.4 5 5.2 5.6l1.2-1.3-1.8-1-1 .7c-.9-.5-1.7-1.3-2.2-2.2l.7-1-1-1.8Z"/></svg>
-            Consultar por WhatsApp
+            Pedir por WhatsApp
           </a>
         </div>
         <dl class="portada-datos">
-          <div><dt>Dónde</dt><dd data-dato="direccion-ciudad">5 de Abril 1163, Chillán</dd></div>
-          <div><dt>Horario</dt><dd data-dato="horario">Lun–sáb 13:00–22:00 · Dom cerrado</dd></div>
+          <div><dt>Pedidos</dt><dd data-dato="whatsapp">+56 9 5471 7526</dd></div>
+          <div data-si="direccion" hidden><dt>Dónde</dt><dd data-dato="direccion-ciudad"></dd></div>
+          <div data-si="horario" hidden><dt>Horario</dt><dd data-dato="horario"></dd></div>
         </dl>
-        <p class="portada-nota">Estado según el horario publicado; puede variar, confirma por WhatsApp.</p>
+        <p class="portada-nota" data-si="horario" hidden>Estado según el horario publicado; puede variar, confirma por WhatsApp.</p>
       </div>
       <div class="destacados" data-destacados></div>
     </div>
     <div class="contenedor portada-pie">
-      <span>Tu próximo sushito empieza aquí</span>
+      <span>Ármalos a tu pinta</span>
       <a class="bajar" href="#carta" aria-label="Bajar a la carta"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
-      <span class="portada-pie-der">Elige qué se te antoja</span>
+      <span class="portada-pie-der">Elige tu promo</span>
     </div>
   </section>
 
@@ -81,13 +79,13 @@
     <div class="contenedor">
       <div class="carta-cabeza">
         <div>
-          <h2 class="titulo-grande" id="carta-titulo">¿Qué se te <span class="rosa">antoja?</span></h2>
-          <p class="carta-bajada">Promos, handrolls, sándwiches y ceviches. Elige tus favoritos y súmalos al pedido.</p>
+          <h2 class="titulo-grande" id="carta-titulo">Elige tu <span class="acento">promo</span></h2>
+          <p class="carta-bajada">Promos, handrolls y rolls armados a tu pinta. Suma lo que quieras al pedido.</p>
         </div>
         <label class="buscador">
           <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
           <span class="oculto">Buscar en la carta</span>
-          <input type="search" data-buscar placeholder="Busca tu favorito" autocomplete="off" enterkeyhint="search">
+          <input type="search" data-buscar placeholder="Busca en la carta" autocomplete="off" enterkeyhint="search">
         </label>
       </div>
       <p class="aviso-carta" data-aviso-carta><span class="aviso-i" aria-hidden="true">i</span><span><b>Carta de referencia.</b> Precios y fotos pueden cambiar. Confirma disponibilidad por WhatsApp.</span></p>
@@ -102,73 +100,70 @@
       </div>
       <p class="carta-otra">
         <span>¿Buscabas otra cosa?</span>
-        <a data-wsp href="https://wa.me/56971431684" target="_blank" rel="noopener">Pregúntale a Mónaco <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a data-wsp href="https://wa.me/56954717526" target="_blank" rel="noopener">Pregúntanos por WhatsApp <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </p>
+    </div>
+  </section>
+
+  <section class="arma" id="arma" aria-labelledby="arma-titulo">
+    <div class="contenedor">
+      <div class="arma-cabeza">
+        <div>
+          <h2 class="titulo-grande titulo-grande--claro" id="arma-titulo">Arma tu <span class="brillo">roll</span></h2>
+          <p class="arma-bajada" data-armado-ayuda></p>
+        </div>
+        <a class="boton" href="#carta" data-armado-ir>Armar mis rolls <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="arma-grilla" data-armado-info></div>
     </div>
   </section>
 
   <section class="pasos" id="como-pedir" aria-labelledby="pasos-titulo">
     <div class="contenedor pasos-grilla">
       <div>
-        <h2 class="titulo-grande titulo-grande--claro" id="pasos-titulo">Arma tu pedido <span class="rosa">y mándalo.</span></h2>
-        <p class="pasos-bajada">El mensaje sale ordenado por WhatsApp. El equipo te confirma disponibilidad, modalidad y total.</p>
+        <h2 class="titulo-grande" id="pasos-titulo">Haz tu pedido <span class="acento">en 3 pasos.</span></h2>
+        <p class="pasos-bajada">El pedido te llega listo para enviar por WhatsApp. Nosotros te confirmamos disponibilidad, modalidad y total.</p>
       </div>
       <ol class="pasos-lista">
-        <li><span class="pasos-num">01</span><div><h3>Elige tus favoritos</h3><p>Filtra por categoría, revisa los precios y suma lo que se te antoja.</p></div></li>
-        <li><span class="pasos-num">02</span><div><h3>Revisa tu pedido</h3><p>Ajusta las cantidades y deja una nota si quieres consultar algo.</p></div></li>
-        <li><span class="pasos-num">03</span><div><h3>Mándalo por WhatsApp</h3><p>El equipo confirma disponibilidad y total contigo.</p></div></li>
+        <li><span class="pasos-num">01</span><div><h3>Elige o arma</h3><p>Escoge una promo o arma tus rolls con la proteína, el relleno y la envoltura que quieras.</p></div></li>
+        <li><span class="pasos-num">02</span><div><h3>Revisa tu pedido</h3><p>Ajusta cantidades, deja una nota y elige si lo retiras o pides delivery.</p></div></li>
+        <li><span class="pasos-num">03</span><div><h3>Envíalo por WhatsApp</h3><p>Te respondemos para confirmar el pedido y el total.</p></div></li>
       </ol>
     </div>
   </section>
 
-  <section class="ubicacion" id="ubicacion" aria-labelledby="ubicacion-titulo">
+  <section class="ubicacion" id="ubicacion" aria-labelledby="ubicacion-titulo" data-si="direccion" hidden>
     <div class="contenedor ubicacion-grilla">
       <div>
-        <h2 class="titulo-grande" id="ubicacion-titulo">Nos vemos <span class="rosa">en <span data-dato="ciudad">Chillán</span>.</span></h2>
+        <h2 class="titulo-grande" id="ubicacion-titulo">Aquí <span class="acento">estamos.</span></h2>
         <ul class="datos-local">
           <li>
-            <svg class="icono icono--rosa" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
-            <div><b data-dato="direccion">5 de Abril 1163</b><span><span data-dato="ciudad">Chillán</span>, <span data-dato="region">Región de Ñuble</span></span></div>
+            <svg class="icono icono--acento" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+            <div><b data-dato="direccion"></b><span><span data-dato="ciudad"></span><span data-si="region">, <span data-dato="region"></span></span></span></div>
           </li>
-          <li>
-            <svg class="icono icono--rosa icono--circulo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 8v4l2.5 2"/></svg>
-            <div data-horario-largo><b>Lunes a sábado</b><span>13:00 – 22:00</span><b>Domingo</b><span>Cerrado</span></div>
+          <li data-si="horario">
+            <svg class="icono icono--acento icono--circulo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 8v4l2.5 2"/></svg>
+            <div data-horario-largo></div>
           </li>
         </ul>
-        <p class="nota-chica">Horario publicado en Instagram; confirma antes de venir.</p>
-        <a class="boton boton--oscuro" data-mapa href="https://www.google.com/maps/search/?api=1&amp;query=M%C3%B3naco+Sushi%2C+5+de+Abril+1163%2C+Chill%C3%A1n%2C+Chile" target="_blank" rel="noopener">Abrir en Google Maps <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <p class="nota-chica" data-si="horario">Confirma el horario por WhatsApp antes de venir.</p>
+        <a class="boton boton--oscuro" data-mapa data-si="mapa" href="#" target="_blank" rel="noopener">Abrir en Google Maps <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
       <figure class="mapa">
-        <iframe data-mapa-embed title="Mapa de Mónaco en Chillán" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=M%C3%B3naco%20Chillan%2C%205%20de%20Abril%201163%2C%20Chill%C3%A1n%2C%20Chile&amp;output=embed"></iframe>
+        <iframe data-mapa-embed title="Mapa del local" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         <figcaption>
-          <svg class="icono icono--rosa" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
-          <span><b>Mónaco Sushi y más</b><small><span data-dato="direccion">5 de Abril 1163</span> · <span data-dato="ciudad">Chillán</span></small></span>
+          <svg class="icono icono--acento" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+          <span><b data-dato="nombre">Sushi</b><small data-dato="direccion-ciudad"></small></span>
         </figcaption>
       </figure>
-    </div>
-  </section>
-
-  <section class="visitanos" aria-labelledby="visitanos-titulo">
-    <div class="contenedor visitanos-grilla">
-      <img class="visitanos-foto" src="img/local-de-noche.webp" width="726" height="864" loading="lazy" alt="Fachada de Mónaco de noche, con el letrero y las luces fucsia encendidas">
-      <div>
-        <p class="antetitulo">Visítanos</p>
-        <h2 class="titulo-medio" id="visitanos-titulo">Sácate una foto con nosotros y etiquétanos</h2>
-        <p>El local brilla en fucsia de punta a punta. Ven por tu sushito, tómate una foto y súbela a Instagram: nos encanta verte por aquí.</p>
-        <p class="visitanos-dir">
-          <svg class="icono icono--rosa" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
-          <b data-dato="direccion-ciudad">5 de Abril 1163, Chillán</b>
-        </p>
-        <a class="boton boton--oscuro" data-instagram href="https://www.instagram.com/monaco_chillan/" target="_blank" rel="noopener">Etiquétanos <span data-dato="instagram">@monaco_chillan</span> <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      </div>
     </div>
   </section>
 
   <section class="antojo" aria-labelledby="antojo-titulo">
     <div class="antojo-fondo" aria-hidden="true"></div>
     <div class="contenedor antojo-centro">
-      <h2 class="titulo-grande titulo-grande--claro" id="antojo-titulo">¿Ya se te <span class="brillo">antojó?</span></h2>
-      <a class="boton" href="#carta">Armar mi pedido <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <h2 class="titulo-grande titulo-grande--claro" id="antojo-titulo">¿Te tinca un <span class="brillo">sushi?</span></h2>
+      <a class="boton boton--claro" href="#carta">Armar mi pedido <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
   </section>
 
@@ -178,16 +173,16 @@
   <div class="contenedor">
     <div class="pie-fila">
       <div class="pie-marca">
-        <img class="marca-logo" src="img/logo.webp" width="96" height="96" alt="">
-        <span class="marca-texto"><b>Mónaco</b><small>Sushi y más</small></span>
-        <span class="pie-lema">Tu próximo sushito te está esperando.</span>
+        <img class="marca-logo" src="img/logo.svg" width="96" height="96" alt="">
+        <span class="marca-texto"><b data-dato="nombre">Sushi</b><small data-dato="lema">Ármalos a tu pinta</small></span>
+        <span class="pie-lema">Pedidos por WhatsApp: <span data-dato="whatsapp">+56 9 5471 7526</span></span>
       </div>
       <nav class="pie-enlaces" aria-label="Redes">
-        <a data-instagram href="https://www.instagram.com/monaco_chillan/" target="_blank" rel="noopener">Instagram <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a data-wsp href="https://wa.me/56971431684" target="_blank" rel="noopener">WhatsApp <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a data-instagram data-si="instagram" hidden href="#" target="_blank" rel="noopener">Instagram <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a data-wsp href="https://wa.me/56954717526" target="_blank" rel="noopener">WhatsApp <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </nav>
     </div>
-    <p class="pie-nota">Precios y horario sujetos a confirmación por WhatsApp.</p>
+    <p class="pie-nota">Precios y promociones sujetos a confirmación por WhatsApp.</p>
   </div>
 </footer>
 
@@ -207,7 +202,7 @@
     <div class="ficha-cuerpo" data-ficha-cuerpo></div>
     <div class="ficha-pie">
       <button class="boton boton--grande" type="button" data-confirmar></button>
-      <p class="nota-chica">Precio referencial. Confirma disponibilidad y detalles con <span data-dato="nombre">Mónaco</span>.</p>
+      <p class="nota-chica">Precio referencial. Te confirmamos disponibilidad y detalles por WhatsApp.</p>
     </div>
   </div>
 </dialog>
