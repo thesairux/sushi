@@ -6,9 +6,39 @@ para cada roll) y envío del pedido ordenado por WhatsApp al +56 9 5471 7526.
 Es una página estática: no necesita servidor, base de datos ni instalar nada. Funciona en Vercel,
 Netlify, GitHub Pages o cualquier hosting, y también abriendo `index.html` directo en el navegador.
 
-## Cambiar la carta, los precios o el horario
+## Panel de administración
 
-Todo está en **`carta.js`**. Desde GitHub: abre el archivo, toca el lápiz (Edit), cambia lo que necesites
+Entra a **tu-pagina.vercel.app/admin** con el usuario y la contraseña del panel.
+El panel no aparece en ningún menú de la página ni en Google.
+
+Ahí ves tu página tal cual, y:
+- **Tocas cualquier texto** (títulos, nombres y descripciones de productos) y escribes encima.
+- Con los botones amarillos **Editar** de cada parte, o con el **+** de cada producto, abres sus opciones:
+  precios, fotos, opciones para elegir, productos agotados, promos de la portada, horario, dirección,
+  WhatsApp y las opciones para armar rolls (proteínas, rellenos, envolturas y sus precios).
+- **Ver como cliente** muestra la página sin marcas de edición; **Celular** la muestra en tamaño de teléfono.
+- Al tocar **Publicar**, los cambios se guardan en este repositorio y Vercel actualiza la página sola
+  en uno o dos minutos.
+
+### Configuración (una sola vez, en Vercel)
+
+En el proyecto de Vercel: **Settings → Environment Variables**
+
+| Nombre | Para qué sirve |
+| --- | --- |
+| `GITHUB_TOKEN` | Obligatoria. Clave de GitHub con permiso *Contents: Read and write* sobre este repositorio. Solo la usa el servidor; nunca llega al navegador. |
+| `ADMIN_USER` | Opcional. Cambia el usuario del panel (si no está: `promosushi`). |
+| `ADMIN_PASSWORD` | Opcional. Cambia la contraseña del panel (si no está, se usa la contraseña de fábrica). |
+| `GITHUB_REPO` | Opcional. `usuario/repositorio`, si el repositorio cambia de dueño o de nombre. |
+| `GITHUB_BRANCH` | Opcional. Rama que publica Vercel (si no está: `main`). |
+
+Después de agregar o cambiar una variable, hay que volver a publicar (Deployments → Redeploy).
+Para revisar la configuración, abre **tu-pagina.vercel.app/api/admin**: dice si la clave de GitHub está puesta
+(nunca la muestra).
+
+## Cambiar la carta a mano
+
+Todo está en **`carta.js`** (el panel escribe ese mismo archivo). Desde GitHub: abre el archivo, toca el lápiz (Edit), cambia lo que necesites
 y guarda con **Commit changes**. Si la página está en Vercel, se actualiza sola en un minuto.
 
 - **Precio**: cambia el número de `"precio"`. Va sin punto ni signo: `14500`, no `"$14.500"`.
@@ -51,6 +81,10 @@ Si la carta deja de aparecer, lo más probable es que falte o sobre una coma en 
 - `css/estilos.css`: colores, tipografías y diseño (computador y celular).
 - `js/app.js`: carta, buscador, pedido, horario de apertura y mensaje de WhatsApp.
 - `img/`: logo (`logo.png`) e íconos, y en `img/carta/` las fotos de las promos (recortadas de los afiches).
+- `admin.html`: el panel de administración.
+- `api/admin.js`: el servidor del panel (revisa la contraseña y guarda los cambios en GitHub).
+- `fotos/`: las fotos que se suben desde el panel (se crea sola).
+- `vercel.json` y `robots.txt`: configuración para que el panel no aparezca en Google.
 
 ## Cómo funciona el pedido
 

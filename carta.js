@@ -11,6 +11,7 @@
   - horarioConfirmado: con false el horario solo se muestra como referencia ("por confirmar"):
     no aparece abierto/cerrado ni se bloquean pedidos. Cámbialo a true cuando esté confirmado.
   - diasCerrados: fechas en que no se atiende aunque el horario diga abierto. Ej: ["2026-12-25"].
+  - "textos": los títulos y textos fijos de la página (portada, carta, pasos, pie).
   - Lo que quede vacío ("") no se muestra: por ejemplo, sin "direccion" no aparece la sección Ubicación.
   - Producto agotado: agrega "disponible": false
   - Producto en la portada (promo destacada): agrega "destacado": true y una "foto".
@@ -53,6 +54,32 @@ window.CARTA = {
   },
   "horarioConfirmado": false,
   "diasCerrados": [],
+  "textos": {
+    "portada": {
+      "titulo": "Sushi",
+      "destacado": "a tu pinta",
+      "bajada": "Elige una promo o arma tus rolls como más te gusten, y mándanos el pedido por WhatsApp. El resto lo confirmamos contigo."
+    },
+    "carta": {
+      "titulo": "Elige tu",
+      "destacado": "promo",
+      "bajada": "Promos, handrolls y rolls armados a tu pinta. Suma lo que quieras al pedido."
+    },
+    "arma": { "titulo": "Arma tu", "destacado": "roll" },
+    "pasos": {
+      "titulo": "Haz tu pedido",
+      "destacado": "en 3 pasos.",
+      "bajada": "El pedido te llega listo para enviar por WhatsApp. Nosotros te confirmamos disponibilidad, modalidad y total.",
+      "lista": [
+        { "titulo": "Elige o arma", "texto": "Escoge una promo o arma tus rolls con la proteína, el relleno y la envoltura que quieras." },
+        { "titulo": "Revisa tu pedido", "texto": "Ajusta cantidades, deja una nota y elige si lo retiras o pides delivery." },
+        { "titulo": "Envíalo por WhatsApp", "texto": "Te respondemos para confirmar el pedido y el total." }
+      ]
+    },
+    "ubicacion": { "titulo": "Te esperamos" },
+    "antojo": { "titulo": "¿Te tinca un", "destacado": "sushi?" },
+    "pie": { "nota": "Precios y promociones sujetos a confirmación por WhatsApp." }
+  },
   "secciones": [
     {
       "nombre": "Promos",

@@ -49,8 +49,8 @@
     <div class="contenedor portada-grilla">
       <div class="portada-texto">
         <p class="estado" data-estado hidden></p>
-        <h1 class="portada-titulo">Sushi <span class="brillo">a tu pinta</span></h1>
-        <p class="portada-bajada">Elige una promo o arma tus rolls como más te gusten, y mándanos el pedido por WhatsApp. El resto lo confirmamos contigo.</p>
+        <h1 class="portada-titulo"><span data-texto="portada.titulo">Sushi</span> <span class="brillo" data-texto="portada.destacado">a tu pinta</span></h1>
+        <p class="portada-bajada" data-texto="portada.bajada">Elige una promo o arma tus rolls como más te gusten, y mándanos el pedido por WhatsApp. El resto lo confirmamos contigo.</p>
         <div class="portada-acciones">
           <a class="boton" href="#carta">Ver la carta <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="enlace-wsp" data-wsp href="https://wa.me/56954717526" target="_blank" rel="noopener">
@@ -78,8 +78,8 @@
     <div class="contenedor">
       <div class="carta-cabeza">
         <div>
-          <h2 class="titulo-grande" id="carta-titulo">Elige tu <span class="acento">promo</span></h2>
-          <p class="carta-bajada">Promos, handrolls y rolls armados a tu pinta. Suma lo que quieras al pedido.</p>
+          <h2 class="titulo-grande" id="carta-titulo"><span data-texto="carta.titulo">Elige tu</span> <span class="acento" data-texto="carta.destacado">promo</span></h2>
+          <p class="carta-bajada" data-texto="carta.bajada">Promos, handrolls y rolls armados a tu pinta. Suma lo que quieras al pedido.</p>
         </div>
         <label class="buscador">
           <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
@@ -108,7 +108,7 @@
     <div class="contenedor">
       <div class="arma-cabeza">
         <div>
-          <h2 class="titulo-grande titulo-grande--claro" id="arma-titulo">Arma tu <span class="brillo">roll</span></h2>
+          <h2 class="titulo-grande titulo-grande--claro" id="arma-titulo"><span data-texto="arma.titulo">Arma tu</span> <span class="brillo" data-texto="arma.destacado">roll</span></h2>
           <p class="arma-bajada" data-armado-ayuda></p>
         </div>
         <a class="boton" href="#carta" data-armado-ir>Armar mis rolls <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -120,13 +120,13 @@
   <section class="pasos" id="como-pedir" aria-labelledby="pasos-titulo">
     <div class="contenedor pasos-grilla">
       <div>
-        <h2 class="titulo-grande" id="pasos-titulo">Haz tu pedido <span class="acento">en 3 pasos.</span></h2>
-        <p class="pasos-bajada">El pedido te llega listo para enviar por WhatsApp. Nosotros te confirmamos disponibilidad, modalidad y total.</p>
+        <h2 class="titulo-grande" id="pasos-titulo"><span data-texto="pasos.titulo">Haz tu pedido</span> <span class="acento" data-texto="pasos.destacado">en 3 pasos.</span></h2>
+        <p class="pasos-bajada" data-texto="pasos.bajada">El pedido te llega listo para enviar por WhatsApp. Nosotros te confirmamos disponibilidad, modalidad y total.</p>
       </div>
       <ol class="pasos-lista">
-        <li><span class="pasos-num">01</span><div><h3>Elige o arma</h3><p>Escoge una promo o arma tus rolls con la proteína, el relleno y la envoltura que quieras.</p></div></li>
-        <li><span class="pasos-num">02</span><div><h3>Revisa tu pedido</h3><p>Ajusta cantidades, deja una nota y elige si lo retiras o pides delivery.</p></div></li>
-        <li><span class="pasos-num">03</span><div><h3>Envíalo por WhatsApp</h3><p>Te respondemos para confirmar el pedido y el total.</p></div></li>
+        <li><span class="pasos-num">01</span><div><h3 data-texto="pasos.lista.0.titulo">Elige o arma</h3><p data-texto="pasos.lista.0.texto">Escoge una promo o arma tus rolls con la proteína, el relleno y la envoltura que quieras.</p></div></li>
+        <li><span class="pasos-num">02</span><div><h3 data-texto="pasos.lista.1.titulo">Revisa tu pedido</h3><p data-texto="pasos.lista.1.texto">Ajusta cantidades, deja una nota y elige si lo retiras o pides delivery.</p></div></li>
+        <li><span class="pasos-num">03</span><div><h3 data-texto="pasos.lista.2.titulo">Envíalo por WhatsApp</h3><p data-texto="pasos.lista.2.texto">Te respondemos para confirmar el pedido y el total.</p></div></li>
       </ol>
     </div>
   </section>
@@ -134,7 +134,7 @@
   <section class="ubicacion" id="ubicacion" aria-labelledby="ubicacion-titulo" data-si="direccion" hidden>
     <div class="contenedor ubicacion-grilla">
       <div>
-        <h2 class="titulo-grande" id="ubicacion-titulo">Te esperamos <span class="acento">en <span data-dato="sector">Peñuelas</span>.</span></h2>
+        <h2 class="titulo-grande" id="ubicacion-titulo"><span data-texto="ubicacion.titulo">Te esperamos</span> <span class="acento">en <span data-dato="sector">Peñuelas</span>.</span></h2>
         <ul class="datos-local">
           <li>
             <svg class="icono icono--acento" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
@@ -168,7 +168,7 @@
   <section class="antojo" aria-labelledby="antojo-titulo">
     <div class="antojo-fondo" aria-hidden="true"></div>
     <div class="contenedor antojo-centro">
-      <h2 class="titulo-grande titulo-grande--claro" id="antojo-titulo">¿Te tinca un <span class="brillo">sushi?</span></h2>
+      <h2 class="titulo-grande titulo-grande--claro" id="antojo-titulo"><span data-texto="antojo.titulo">¿Te tinca un</span> <span class="brillo" data-texto="antojo.destacado">sushi?</span></h2>
       <a class="boton boton--claro" href="#carta">Armar mi pedido <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
   </section>
@@ -188,7 +188,7 @@
         <a data-wsp href="https://wa.me/56954717526" target="_blank" rel="noopener">WhatsApp <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </nav>
     </div>
-    <p class="pie-nota">Precios y promociones sujetos a confirmación por WhatsApp.</p>
+    <p class="pie-nota" data-texto="pie.nota">Precios y promociones sujetos a confirmación por WhatsApp.</p>
   </div>
 </footer>
 

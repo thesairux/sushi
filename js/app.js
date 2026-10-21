@@ -3,9 +3,13 @@
 (function () {
   "use strict";
 
-  var C = window.CARTA;
-  if (!C) return;
-  var N = C.negocio || {};
+  if (!window.CARTA) return;
+  var C, N;
+  // Dentro del panel (/admin) la página se muestra con los cambios sin publicar, y en modo edición
+  // los textos se cambian tocándolos (nunca en la página publicada).
+  var PREVIA = /[?&]preview/.test(location.search) && window.parent !== window;
+  var EDITAR = PREVIA && /[?&]edit/.test(location.search);
+  var editando = EDITAR;
   var ZONA = "America/Santiago";
   var GUARDADO = "sushi-pedido-v1";
   var DIAS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
@@ -44,12 +48,32 @@
   /* ---------- índice de la carta ---------- */
   var PRODUCTOS = {};
   var GRUPOS = {};
-  (C.secciones || []).forEach(function (sec) {
-    (sec.categorias || []).forEach(function (cat) {
-      (cat.productos || []).forEach(function (p) { PRODUCTOS[p.id] = { p: p, cat: cat, sec: sec }; });
+  var RUTA_CAT = {};
+  var CON_HORARIO = false;
+  var HORARIO_ACTIVO = false;
+  /* Toma los datos de carta.js, o los que manda el panel en la vista previa. "ruta" dice dónde está
+     cada texto dentro de los datos, para que el panel sepa qué se editó. */
+  function usarCarta(datos) {
+    C = datos;
+    N = C.negocio || {};
+    PRODUCTOS = {};
+    GRUPOS = {};
+    RUTA_CAT = {};
+    (C.secciones || []).forEach(function (sec, si) {
+      (sec.categorias || []).forEach(function (cat, ci) {
+        var ruta = "secciones." + si + ".categorias." + ci;
+        RUTA_CAT[cat.id] = ruta;
+        (cat.productos || []).forEach(function (p, pi) {
+          PRODUCTOS[p.id] = { p: p, cat: cat, sec: sec, ruta: ruta + ".productos." + pi };
+        });
+      });
     });
-  });
-  (C.personalizacion || []).forEach(function (g) { GRUPOS[g.id] = g; });
+    (C.personalizacion || []).forEach(function (g) { GRUPOS[g.id] = g; });
+    CON_HORARIO = !!C.horario && Object.keys(C.horario).some(function (k) { return rangos(C.horario[k]).length > 0; });
+    // Con "horarioConfirmado": false el horario solo se muestra: no hay abierto/cerrado ni se bloquean pedidos.
+    HORARIO_ACTIVO = CON_HORARIO && C.horarioConfirmado !== false;
+  }
+  usarCarta(window.CARTA);
 
   function ingrediente(id) { return (C.ingredientes && C.ingredientes[id]) || String(id || "").replace(/-/g, " "); }
   function gruposDe(id) {
@@ -202,9 +226,6 @@
     if ((C.diasCerrados || []).indexOf(fecha) >= 0) return [];
     return rangos((C.horario || {})[DIAS[dia]]);
   }
-  var CON_HORARIO = !!C.horario && Object.keys(C.horario).some(function (k) { return rangos(C.horario[k]).length > 0; });
-  // Con "horarioConfirmado": false el horario solo se muestra: no hay abierto/cerrado ni se bloquean pedidos.
-  var HORARIO_ACTIVO = CON_HORARIO && C.horarioConfirmado !== false;
   function direccionCompleta() { return [N.direccion, N.sector].filter(Boolean).join(", "); }
   function estadoLocal() {
     if (!HORARIO_ACTIVO) return { abierto: true, texto: "", sinHorario: true };
@@ -288,12 +309,25 @@
     var mapa = $("[data-mapa-embed]");
     if (mapa && N.direccion && !$("#ubicacion").hidden) {
       var busqueda = N.mapaBusqueda || [N.direccion, N.sector, N.ciudad, "Chile"].filter(Boolean).join(", ");
-      mapa.src = "https://www.google.com/maps?q=" + encodeURIComponent(busqueda) + "&output=embed";
+      var src = "https://www.google.com/maps?q=" + encodeURIComponent(busqueda) + "&output=embed";
+      if (mapa.getAttribute("src") !== src) mapa.src = src;
     }
     var largo = $("[data-horario-largo]");
     if (largo) largo.innerHTML = horarioLargo();
     var aviso = $("[data-aviso-carta]");
     if (aviso) aviso.hidden = N.cartaReferencial === false;
+  }
+
+  /* Títulos y textos fijos de la página ("textos" en carta.js) */
+  function valorEn(obj, ruta) {
+    return ruta.split(".").reduce(function (a, k) { return a == null ? a : a[k]; }, obj);
+  }
+  function pintarTextos() {
+    var T = C.textos || {};
+    $$("[data-texto]").forEach(function (el) {
+      var v = valorEn(T, el.getAttribute("data-texto"));
+      if (typeof v === "string" && el.textContent !== v && document.activeElement !== el) el.textContent = v;
+    });
   }
 
   var estadoOculto = false;
@@ -397,26 +431,30 @@
         (piezas ? " · <b>" + piezas + " piezas</b>" : "") + icono("abajo") + "</button>" +
         '<ul class="variedades-lista" hidden>' + lineas.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul>";
     }
-    return lineas.length ? '<p class="fila-detalle">' + esc(lineas[0]) + "</p>" : "";
+    return lineas.length ? '<p class="fila-detalle"' + rutaDe(p, "detalle") + ">" + esc(lineas[0]) + "</p>" : "";
   }
-  function notaProducto(p) { return p.nota ? '<p class="fila-incluye">' + esc(p.nota) + "</p>" : ""; }
+  /* atributo con la ruta del texto, solo en el modo edición del panel */
+  function ruta(r) { return EDITAR ? ' data-e="' + esc(r) + '"' : ""; }
+  function rutaDe(p, campo) { return ruta(PRODUCTOS[p.id].ruta + "." + campo); }
+  function notaProducto(p) { return p.nota ? '<p class="fila-incluye"' + rutaDe(p, "nota") + ">" + esc(p.nota) + "</p>" : ""; }
   function fila(p) {
     return '<li class="fila' + (p.disponible === false ? " fila--agotada" : "") + '">' +
-      '<div class="fila-texto"><h4 class="fila-nombre">' + esc(p.nombre) + "</h4>" + detalleLista(p) + notaProducto(p) + "</div>" +
+      '<div class="fila-texto"><h4 class="fila-nombre"' + rutaDe(p, "nombre") + ">" + esc(p.nombre) + "</h4>" + detalleLista(p) + notaProducto(p) + "</div>" +
       '<div class="fila-lado"><span class="precio">' + precioLista(p) + "</span>" + botonAgregar(p, "fila") + "</div></li>";
   }
   function tarjeta(p) {
     var foto = p.foto
       ? '<div class="tarjeta-foto"><img src="' + esc(p.foto) + '" alt="Foto de ' + esc(p.nombre) + '" width="1000" height="725" loading="lazy"></div>'
-      : '<div class="tarjeta-foto tarjeta-foto--vacia"><img src="img/logo.webp" alt="" width="64" height="64" loading="lazy"></div>';
+      : '<div class="tarjeta-foto tarjeta-foto--vacia"><img src="img/logo.png" alt="" width="399" height="240" loading="lazy"></div>';
     return '<li class="tarjeta' + (p.disponible === false ? " fila--agotada" : "") + '">' + foto +
-      '<div class="tarjeta-cuerpo"><h4 class="fila-nombre">' + esc(p.nombre) + "</h4>" + detalleLista(p) + notaProducto(p) +
+      '<div class="tarjeta-cuerpo"><h4 class="fila-nombre"' + rutaDe(p, "nombre") + ">" + esc(p.nombre) + "</h4>" + detalleLista(p) + notaProducto(p) +
       '<div class="tarjeta-pie"><span class="precio">' + precioLista(p) + "</span>" + botonAgregar(p, "tarjeta") + "</div></div></li>";
   }
   function bloque(cat, productos, titulo) {
     var conFotos = productos.some(function (p) { return p.foto; });
     return '<section class="bloque" id="cat-' + esc(cat.id) + '" aria-label="' + esc(titulo || cat.nombre) + '">' +
-      '<header class="bloque-cab"><h3>' + esc(titulo || cat.nombre) + "</h3>" + (cat.nota ? "<p>" + esc(cat.nota) + "</p>" : "") + "</header>" +
+      '<header class="bloque-cab"><h3' + ruta(RUTA_CAT[cat.id] + ".nombre") + ">" + esc(titulo || cat.nombre) + "</h3>" +
+      (cat.nota ? "<p" + ruta(RUTA_CAT[cat.id] + ".nota") + ">" + esc(cat.nota) + "</p>" : "") + "</header>" +
       (conFotos ? '<ul class="tarjetas">' + productos.map(tarjeta).join("") + "</ul>" : '<ul class="filas">' + productos.map(fila).join("") + "</ul>") +
       "</section>";
   }
@@ -1205,7 +1243,9 @@
       });
     });
     var seccion = caja.closest("section");
-    if (!encontrado) { seccion.hidden = true; $$('a[href="#arma"]').forEach(function (a) { a.hidden = true; }); return; }
+    seccion.hidden = !encontrado;
+    $$('a[href="#arma"]').forEach(function (a) { a.hidden = !encontrado; });
+    if (!encontrado) return;
     $("[data-armado-ayuda]").textContent = encontrado.cat.ayuda || "";
     $("[data-armado-ir]").setAttribute("data-ir-seccion", encontrado.si);
     caja.innerHTML = encontrado.ga.map(function (g) {
@@ -1217,11 +1257,98 @@
   }
 
   /* ---------- inicio ---------- */
-  pintarDatos();
-  pintarArmado();
-  pintarEstado();
-  pintarDestacados();
-  pintarCarta();
-  pintarContador(false);
+  function pintarTodo() {
+    pintarDatos();
+    pintarTextos();
+    pintarArmado();
+    pintarEstado();
+    pintarDestacados();
+    pintarCarta();
+    pintarContador(false);
+  }
+  if (EDITAR) carrusel.pausado = true;
+  pintarTodo();
   revisarNav();
+
+  /* ---------- vista previa y edición desde el panel (/admin) ---------- */
+  if (!PREVIA) return;
+  var alPanel = function (msg) { window.parent.postMessage(msg, location.origin); };
+  var ZONAS = [["#inicio", "textos negocio", "Editar portada"], ["#carta", "carta", "Editar carta y precios"],
+    ["#arma", "armado", "Editar opciones de rolls"], ["#como-pedir", "textos", "Editar pasos"],
+    ["#ubicacion", "negocio horario", "Editar dirección y horario"], [".antojo", "textos", "Editar textos"],
+    [".pie", "negocio textos", "Editar pie de página"]];
+  var SOLO_TEXTO = (function () { var d = document.createElement("div"); d.contentEditable = "plaintext-only"; return d.contentEditable === "plaintext-only"; })();
+  function rutaEditable(el) { return el.hasAttribute("data-texto") ? "textos." + el.getAttribute("data-texto") : el.getAttribute("data-e"); }
+  function marcarEditables() {
+    document.documentElement.classList.toggle("editando", editando);
+    $$("[data-e],[data-texto]").forEach(function (el) {
+      if (editando) { el.contentEditable = SOLO_TEXTO ? "plaintext-only" : "true"; el.spellcheck = true; }
+      else el.removeAttribute("contenteditable");
+    });
+    $$(".editar-chip").forEach(function (c) { c.hidden = !editando; });
+    if (!editando) return;
+    ZONAS.forEach(function (z) {
+      var zona = $(z[0]);
+      if (!zona || zona.querySelector(":scope > .editar-chip")) return;
+      zona.setAttribute("data-grupo", z[1]);
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "editar-chip";
+      b.setAttribute("data-abrir-grupos", z[1]);
+      b.innerHTML = '<svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4"/></svg>' + z[2];
+      zona.appendChild(b);
+    });
+  }
+  if (EDITAR) {
+    // en edición los botones no piden ni abren enlaces: los de cada producto abren su editor en el panel
+    document.addEventListener("click", function (e) {
+      if (!editando) return;
+      var chip = e.target.closest("[data-abrir-grupos]");
+      var agregar = e.target.closest("[data-agregar]");
+      if (chip || agregar) {
+        e.preventDefault(); e.stopPropagation();
+        alPanel(chip ? { type: "sushi-abrir", grupos: chip.getAttribute("data-abrir-grupos").split(" ") }
+          : { type: "sushi-abrir", grupos: ["carta"], producto: agregar.getAttribute("data-agregar") });
+        return;
+      }
+      if (e.target.closest("a, [data-abrir-pedido]")) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+    document.addEventListener("input", function (e) {
+      var el = editando && e.target.closest && e.target.closest("[data-e],[data-texto]");
+      if (!el) return;
+      // textContent y no innerText: innerText entrega los títulos en mayúsculas, como los muestra el CSS
+      var valor = el.textContent.replace(/\s+/g, " ");
+      alPanel({ type: "sushi-editar", ruta: rutaEditable(el), valor: valor });
+    });
+    document.addEventListener("keydown", function (e) {
+      var el = e.target.closest && e.target.closest("[contenteditable]");
+      if (!el) return;
+      if (e.key === "Enter" || e.key === "Escape") { e.preventDefault(); el.blur(); }
+    });
+    document.addEventListener("paste", function (e) {
+      var el = e.target.closest && e.target.closest("[contenteditable]");
+      if (!el || SOLO_TEXTO) return;
+      e.preventDefault();
+      document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text/plain"));
+    });
+  }
+  window.addEventListener("message", function (e) {
+    if (e.origin !== location.origin || !e.data) return;
+    var d = e.data;
+    if (d.type === "sushi-vista" && d.carta && typeof d.carta === "object") {
+      usarCarta(d.carta);
+      estado = estadoLocal();
+      pedido.items = pedido.items.filter(function (it) { return PRODUCTOS[it.id]; });
+      if (vista.seccion >= C.secciones.length) { vista.seccion = 0; vista.categoria = null; }
+      pintarTodo();
+      if (EDITAR) marcarEditables();
+    }
+    if (d.type === "sushi-modo") { editando = !!d.editar; marcarEditables(); }
+    if (d.type === "sushi-ir" && /^[a-z]+$/.test(d.grupo)) {
+      var zona = $('[data-grupo~="' + d.grupo + '"]');
+      if (zona) zona.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+  if (EDITAR) marcarEditables();
+  alPanel({ type: "sushi-lista" });
 })();

@@ -555,6 +555,20 @@ dialog::backdrop { background: rgba(18, 16, 22, .55); }
 .vacio { display: grid; justify-items: start; gap: 14px; padding: 34px 28px; color: var(--suave); }
 .vacio b { color: var(--texto); font-size: 1.05rem; }
 
+/* ---------- edición desde el panel (/admin) ---------- */
+html.editando [data-grupo] { position: relative; }
+.editar-chip {
+  position: absolute; z-index: 26; top: 14px; right: max(14px, env(safe-area-inset-right, 0px));
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border: 0; border-radius: 999px;
+  background: var(--amarillo); color: var(--tinta); font: 700 .85rem/1 var(--cuerpo); box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
+}
+.editar-chip:hover { background: #ffd84d; }
+.pie > .editar-chip { top: auto; bottom: 10px; }
+html.editando [contenteditable] { outline: 2px dashed transparent; outline-offset: 3px; cursor: text; }
+html.editando [contenteditable]:hover { outline-color: rgba(255, 204, 31, .85); }
+html.editando [contenteditable]:focus { outline: 2px solid var(--amarillo); }
+html.editando .brillo[contenteditable] { -webkit-text-fill-color: currentColor; }
+
 /* ---------- celular y tablet ---------- */
 @media (max-width: 960px) {
   .menu { display: none; }
